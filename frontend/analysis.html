@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InvestIQ Analysis</title>
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("investiq-theme") || "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=aom-logo-1" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body class="analysis-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="site-header">
+    <a class="brand brand-refined" href="index.html" aria-label="InvestIQ home">
+      <span class="brand-mark brand-mark-aom" aria-hidden="true">
+        <span class="brand-monogram">
+          <span class="brand-letter brand-letter-a">A</span>
+          <span class="brand-letter brand-letter-o">O</span>
+          <span class="brand-letter brand-letter-m">M</span>
+        </span>
+      </span>
+      <span class="brand-copy">
+        <strong>InvestIQ</strong>
+        <small>Simply fundamentals</small>
+      </span>
+    </a>
+
+    <nav class="header-actions" aria-label="Header actions">
+      <form class="mini-search" id="analysisSearchForm" autocomplete="off">
+        <input id="analysisTickerInput" type="text" placeholder="AAPL" maxlength="10" aria-label="Ticker" />
+        <button class="secondary-button" type="submit">Analyze</button>
+      </form>
+      <button class="ghost-button" id="themeToggle" type="button" aria-label="Toggle theme">
+        <span id="themeIcon">☾</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="analysisPage">
+    <section class="analysis-hero">
+      <div>
+        <p class="eyebrow">Company report</p>
+        <h1 id="companyTitle">Loading analysis...</h1>
+        <p id="companySubtitle" class="hero-text">Preparing local fundamental data.</p>
+      </div>
+
+    </section>
+
+    <div class="data-limitation-banner">
+      Only tickers available in the prepared local dataset can be analyzed. If a ticker is not found,
+      it means the local source files do not contain a complete usable record for it.
+    </div>
+
+    <div class="loading-bar" id="loadingBar" hidden>
+      <span></span>
+    </div>
+
+    <div class="page-error" id="analysisError" hidden></div>
+
+    <section class="tabs-shell" aria-label="Analysis tabs">
+      <div class="tabs" role="tablist">
+        <button class="tab-button active" data-tab="profile" role="tab">Profile</button>
+        <button class="tab-button" data-tab="financials" role="tab">Financials</button>
+        <button class="tab-button" data-tab="ratios" role="tab">Ratios</button>
+        <button class="tab-button" data-tab="peers" role="tab">Peer Comparison</button>
+        <button class="tab-button" data-tab="valuation" role="tab">Valuation Signal</button>
+        <button class="tab-button" data-tab="backtest" role="tab">Backtest</button>
+      </div>
+
+      <section class="tab-panel active" id="tab-profile" role="tabpanel">
+        <div class="section-heading compact">
+          <p class="eyebrow">Profile</p>
+          <h2>Company snapshot</h2>
+        </div>
+        <div class="profile-grid" id="profileGrid"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-financials" role="tabpanel">
+        <div class="section-heading compact">
+          <p class="eyebrow">Annual financials</p>
+          <h2>Historical performance</h2>
+        </div>
+        <div class="financial-chart-grid">
+          <article class="financial-chart-panel">
+            <div class="chart-zone">
+              <div id="revenueChart" class="chart"></div>
+            </div>
+            <aside class="financial-chart-note">
+              <span>Top line</span>
+              <h4>Revenue</h4>
+              <p>
+                Revenue shows how much business the company generated before expenses.
+                A rising revenue line can indicate growth, but it should not be read alone.
+              </p>
+              <p>
+                Compare it with net income. If revenue rises but profit does not, the company may have
+                cost pressure, weak margins, or heavy reinvestment.
+              </p>
+            </aside>
+          </article>
+
+          <article class="financial-chart-panel">
+            <div class="chart-zone">
+              <div id="netIncomeChart" class="chart"></div>
+            </div>
+            <aside class="financial-chart-note">
+              <span>Profitability</span>
+              <h4>Net income</h4>
+              <p>
+                Net income shows the profit left after expenses, interest, taxes, and other costs.
+                It is usually a stronger quality signal than revenue alone.
+              </p>
+              <p>
+                Stable or growing net income may indicate better operating discipline.
+                Sharp drops may reflect business cycles, one-time charges, or margin weakness.
+              </p>
+            </aside>
+          </article>
+
+          <article class="financial-chart-panel">
+            <div class="chart-zone">
+              <div id="assetsChart" class="chart"></div>
+            </div>
+            <aside class="financial-chart-note">
+              <span>Balance sheet</span>
+              <h4>Total assets</h4>
+              <p>
+                Total assets show the size of the company’s balance sheet. Asset growth may indicate
+                expansion, acquisitions, or higher capital intensity.
+              </p>
+              <p>
+                More assets are not automatically better. Read this together with ROA, debt, equity,
+                and net income to see whether the assets are productive.
+              </p>
+            </aside>
+          </article>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Annual financials</h3>
+          </div>
+          <div class="table-wrap">
+            <table id="financialsTable"></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-ratios" role="tabpanel">
+        <div class="section-heading compact">
+          <p class="eyebrow">Ratios</p>
+          <h2>Valuation and quality indicators</h2>
+        </div>
+
+        <div class="explainer-panel">
+          <h3>How to read valuation and quality indicators</h3>
+          <p>
+            These ratios are simple financial indicators calculated from the prepared local dataset.
+            They are not live market signals. Green, yellow, and red are educational thresholds used to make the numbers easier to read.
+          </p>
+          <div class="explanation-grid">
+            <article><strong>P/E</strong><span>Price compared with earnings. Lower can mean cheaper, but very low can also reflect risk.</span></article>
+            <article><strong>P/B</strong><span>Price compared with book value. Lower can mean cheaper relative to accounting equity.</span></article>
+            <article><strong>ROE</strong><span>Profit generated from shareholder equity. Higher usually means better profitability.</span></article>
+            <article><strong>ROA</strong><span>Profit generated from total assets. Higher means assets are used more efficiently.</span></article>
+            <article><strong>D/E</strong><span>Debt compared with equity. Lower usually means less balance-sheet leverage.</span></article>
+            <article><strong>Current Ratio</strong><span>Current assets compared with current liabilities. Higher means stronger short-term liquidity.</span></article>
+            <article><strong>Gross Margin</strong><span>Share of revenue left after direct costs. Higher means stronger product or service margin.</span></article>
+          </div>
+        </div>
+
+        <div class="score-card" id="healthScoreCard"></div>
+        <div class="ratio-grid" id="ratioGrid"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-peers" role="tabpanel">
+        <div class="section-heading compact">
+          <p class="eyebrow">Peer comparison</p>
+          <h2>Sector and peer context</h2>
+        </div>
+
+        <div class="explainer-panel">
+          <h3>How peer comparison works</h3>
+          <p>
+            InvestIQ first looks for companies in the same industry. If there are not enough peers, it expands to the same sector.
+            The table shows comparable companies. The bar chart shows metric values. The radar chart converts each metric to a 0-100 score,
+            where a higher score is always better.
+          </p>
+          <p>
+            For radar scoring, higher is better for ROE, ROA, Current Ratio, and Gross Margin. Lower is better for P/E, P/B, and Debt-to-Equity.
+            This makes unlike metrics easier to compare visually.
+          </p>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card wide"><div id="peerBarChart" class="chart"></div></div>
+          <div class="chart-card wide"><div id="peerRadarChart" class="chart"></div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Peers</h3>
+          </div>
+          <div class="table-wrap">
+            <table id="peersTable"></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-valuation" role="tabpanel">
+        <div class="section-heading compact">
+          <p class="eyebrow">Valuation signal</p>
+          <h2>Local classifier output</h2>
+        </div>
+
+        <div class="explainer-panel">
+          <h3>How the valuation signal works</h3>
+          <p>
+            The classifier is trained locally from the prepared historical dataset. It learns labels based on sector-relative valuation rules,
+            not from live market prices or analyst opinions. The verdict is therefore an educational signal, not an investment recommendation.
+          </p>
+          <p>
+            Confidence is the model probability for the selected verdict. Feature importance shows which ratios were most influential during model training.
+          </p>
+        </div>
+
+        <div class="valuation-layout valuation-layout-vertical">
+          <div class="valuation-card" id="valuationCard"></div>
+          <div class="chart-card"><div id="featureImportanceChart" class="chart"></div></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-backtest" role="tabpanel">
+        <div class="section-heading compact">
+          <p class="eyebrow">Educational backtest</p>
+          <h2>Simple historical simulation</h2>
+        </div>
+
+        <div class="explainer-panel backtest-explainer">
+          <h3>How to read this backtest</h3>
+          <p>
+            This backtest is a simple learning tool. It answers one question:
+            what would have happened if a basic value-and-quality rule had been applied
+            to the selected tickers during the selected historical period?
+          </p>
+
+          <div class="explanation-grid backtest-explanation-grid">
+            <article>
+              <strong>Buy rule</strong>
+              <span>
+                A ticker is bought when the latest available annual fundamentals show
+                P/E below 15 and ROE above 15%. This means the company appears reasonably priced
+                and profitable based on the local dataset.
+              </span>
+            </article>
+
+            <article>
+              <strong>Sell rule</strong>
+              <span>
+                A position is sold after 252 trading days, roughly one trading year,
+                or earlier if the selected end date is reached.
+              </span>
+            </article>
+
+            <article>
+              <strong>Capital allocation</strong>
+              <span>
+                Initial capital is split equally across tickers that trigger the buy rule.
+                Tickers that do not trigger the rule are shown as skipped.
+              </span>
+            </article>
+
+            <article>
+              <strong>Data limitation</strong>
+              <span>
+                Prices are daily, but fundamentals are annual. InvestIQ uses the latest available
+                annual fundamentals at or before the trade year. This is realistic enough for learning,
+                but it is not a professional trading engine.
+              </span>
+            </article>
+          </div>
+
+          <p class="explainer-warning">
+            The result should be read as an educational historical simulation, not as a forecast,
+            trading signal, or investment recommendation.
+          </p>
+        </div>
+
+<form class="backtest-form" id="backtestForm">
+          <label>
+            Tickers
+            <input id="backtestTickers" type="text" value="AAPL, MSFT, IBM, CSCO" />
+          </label>
+          <label>
+            Start date
+            <input id="backtestStart" type="date" value="2014-01-01" />
+          </label>
+          <label>
+            End date
+            <input id="backtestEnd" type="date" value="2016-12-31" />
+          </label>
+          <label>
+            Initial capital
+            <input id="backtestCapital" type="number" min="0" step="100" value="10000" />
+          </label>
+          <button class="primary-button" type="submit">Run backtest</button>
+        </form>
+
+        <div class="inline-error" id="backtestError"></div>
+
+        <div class="metric-grid" id="backtestMetrics"></div>
+
+        <div class="chart-card wide">
+          <div id="portfolioChart" class="chart"></div>
+        </div>
+
+        <div class="methodology-card" id="backtestMethodology"></div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Trades</h3>
+          </div>
+          <div class="table-wrap">
+            <table id="tradesTable"></table>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Educational analysis based on historical local data. Not investment advice.</p>
+  </footer>
+
+  <script src="script.js?v=aom-logo-1"></script>
+</body>
+</html>

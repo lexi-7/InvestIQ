@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Local datasets
+data/raw/
+data/*.parquet
+*.zip
+
+# Generated models
+models/*.joblib
+models/model_metrics.json
+
+# Test/cache files
+.pytest_cache/
+.coverage
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Local dataset folder accidentally placed in root
+Fundementals/

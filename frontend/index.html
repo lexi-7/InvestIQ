@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InvestIQ | Simply Fundamentals</title>
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("investiq-theme") || "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=aom-logo-1" />
+</head>
+<body class="home-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="site-header">
+    <a class="brand brand-refined" href="index.html" aria-label="InvestIQ home">
+      <span class="brand-mark brand-mark-aom" aria-hidden="true">
+        <span class="brand-monogram">
+          <span class="brand-letter brand-letter-a">A</span>
+          <span class="brand-letter brand-letter-o">O</span>
+          <span class="brand-letter brand-letter-m">M</span>
+        </span>
+      </span>
+      <span class="brand-copy">
+        <strong>InvestIQ</strong>
+        <small>Simply fundamentals</small>
+      </span>
+    </a>
+
+    <nav class="header-actions" aria-label="Header actions">
+      <button class="ghost-button" id="themeToggle" type="button" aria-label="Toggle theme">
+        <span id="themeIcon">☾</span>
+      </button>
+      <a class="ghost-link" href="analysis.html?ticker=AAPL">Open analysis</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-shell">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Local financial intelligence</p>
+        <h1>Fundamentals, made readable.</h1>
+        <p class="hero-text">
+          Enter a ticker and review company profile, historical financials, ratios,
+          peer context, valuation signal, and an educational backtest from local source files.
+        </p>
+
+        <form class="search-panel" id="homeSearchForm" autocomplete="off">
+          <label for="tickerInput">Ticker symbol</label>
+          <div class="search-row">
+            <input
+              id="tickerInput"
+              name="ticker"
+              type="text"
+              placeholder="AAPL"
+              maxlength="10"
+              aria-describedby="tickerHelp"
+            />
+            <button class="primary-button" type="submit">Analyze</button>
+          </div>
+          <div class="suggestions" id="suggestions" aria-live="polite"></div>
+          <p class="field-help" id="tickerHelp">
+            Examples:
+            <button type="button" class="ticker-pill" data-ticker="AAPL">AAPL</button>
+            <button type="button" class="ticker-pill" data-ticker="MSFT">MSFT</button>
+            <button type="button" class="ticker-pill" data-ticker="IBM">IBM</button>
+            <button type="button" class="ticker-pill" data-ticker="CSCO">CSCO</button>
+            <button type="button" class="ticker-pill" data-ticker="XOM">XOM</button>
+          </p>
+          <p class="local-dataset-note">
+            Only tickers available in the prepared local dataset can be analyzed.
+            Some well-known S&amp;P 500 tickers may be unavailable if the source files do not contain complete fundamentals.
+          </p>
+          <div class="inline-error" id="homeError"></div>
+        </form>
+      </div>
+
+      <aside class="quote-card reveal delay-1" aria-label="Investor quote">
+        <div class="quote-kicker">Investor note</div>
+        <blockquote id="investorQuote">
+          “The stock market is filled with individuals who know the price of everything, but the value of nothing.”
+        </blockquote>
+        <p id="quoteAuthor">Philip Fisher</p>
+        <div class="quote-dots" id="quoteDots" aria-label="Quote navigation"></div>
+      </aside>
+    </section>
+
+    <section class="module-section reveal delay-2" aria-labelledby="modulesTitle">
+      <div class="section-heading section-heading-centered">
+        <div>
+          <p class="eyebrow">Analysis modules</p>
+          <h2 id="modulesTitle">What InvestIQ checks</h2>
+        </div>
+      </div>
+
+      <div class="module-grid">
+        <article class="module-card">
+          <span class="module-number">01</span>
+          <h3>Company profile</h3>
+          <p>Shows the latest available company identity, sector, industry, and core balance-sheet context.</p>
+        </article>
+        <article class="module-card">
+          <span class="module-number">02</span>
+          <h3>Historical financials</h3>
+          <p>Charts annual revenue, net income, and assets from the local fundamentals dataset.</p>
+        </article>
+        <article class="module-card">
+          <span class="module-number">03</span>
+          <h3>Financial ratios</h3>
+          <p>Explains valuation, profitability, leverage, liquidity, and margin ratios with simple status colors.</p>
+        </article>
+        <article class="module-card">
+          <span class="module-number">04</span>
+          <h3>Peer comparison</h3>
+          <p>Compares a company with industry and sector peers using chart-ready normalized values.</p>
+        </article>
+        <article class="module-card">
+          <span class="module-number">05</span>
+          <h3>Valuation signal</h3>
+          <p>Uses the locally trained classifier to classify a ticker as undervalued, fairly valued, or overvalued.</p>
+        </article>
+        <article class="module-card">
+          <span class="module-number">06</span>
+          <h3>Backtest</h3>
+          <p>Runs a simple educational strategy using local daily prices and annual fundamentals.</p>
+        </article>
+      </div>
+    </section>
+
+
+    <section class="source-section reveal delay-3">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Source</p>
+          <h2>Local files used by InvestIQ</h2>
+        </div>
+      </div>
+
+      <div class="source-grid">
+        <article class="source-card">
+          <span>Fundamentals</span>
+          <strong>data/raw/fundamentals.csv</strong>
+          <p>Annual company financial statements used for revenue, income, assets, equity, debt, EPS, and ratio inputs.</p>
+        </article>
+        <article class="source-card">
+          <span>Company list</span>
+          <strong>data/raw/securities.csv</strong>
+          <p>Company name, ticker, sector, and industry reference data.</p>
+        </article>
+        <article class="source-card">
+          <span>Prices</span>
+          <strong>data/raw/prices-split-adjusted.csv</strong>
+          <p>Historical split-adjusted daily prices used for year-end prices and the educational backtest.</p>
+        </article>
+        <article class="source-card">
+          <span>Local outputs</span>
+          <strong>data/sp500_complete.parquet<br>data/sp500_prices.parquet</strong>
+          <p>Cleaned local Parquet files used by the backend at runtime.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="method-section reveal delay-3">
+      <div class="method-card">
+        <h2>Local data, clear limits.</h2>
+        <p>
+          InvestIQ uses local CSV source files converted into local Parquet files. It does not call live market APIs,
+          SEC EDGAR, Wikipedia, or yfinance at runtime. The data is historical and may not reflect current market conditions.
+        </p>
+      </div>
+      <div class="method-card muted">
+        <h2>Educational use only.</h2>
+        <p>
+          The analysis is designed for learning fundamental analysis and Python web development.
+          It is not investment advice, a recommendation, or a real-time trading system.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>InvestIQ uses historical local data for educational analysis only.</p>
+    <p>No live market data. No investment advice.</p>
+  </footer>
+
+  <script src="script.js?v=aom-logo-1"></script>
+</body>
+</html>
