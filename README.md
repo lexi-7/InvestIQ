@@ -423,9 +423,9 @@ touch backend/__init__.py
 
 ## Pydantic field_validator error
 
-\`\`\`bash
+```bash
 pip install --upgrade fastapi pydantic
-\`\`\`
+```
 
 ---
 
