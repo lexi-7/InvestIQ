@@ -25,7 +25,7 @@ InvestIQ НЕ использует Streamlit.
 
 Текущая структура проекта:
 
-\`\`\`text
+```text
 investiq/
   backend/
     __init__.py
@@ -68,7 +68,7 @@ investiq/
 
   requirements.txt
   README.md
-\`\`\`
+```
 
 ---
 
@@ -87,10 +87,10 @@ investiq/
 
 Backend читает только локальные Parquet-файлы:
 
-\`\`\`text
+```text
 data/sp500_complete.parquet
 data/sp500_prices.parquet
-\`\`\`
+```
 
 Frontend использует Plotly через CDN в analysis.html.
 
@@ -106,17 +106,17 @@ dgawlik/nyse
 
 Необходимые файлы:
 
-\`\`\`text
+```text
 data/raw/fundamentals.csv
 data/raw/securities.csv
 data/raw/prices-split-adjusted.csv
-\`\`\`
+```
 
 Игнорируемый файл:
 
-\`\`\`text
+```text
 data/raw/prices.csv
-\`\`\`
+```
 
 ---
 
@@ -138,37 +138,37 @@ data/raw/prices.csv
 
 ## Шаг 1. Перейдите в папку проекта
 
-\`\`\`bash
+```bash
 cd InvestIQ
-\`\`\`
+```
 
 ## Шаг 2. Создайте виртуальное окружение
 
 ### Mac/Linux
 
-\`\`\`bash
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
-\`\`\`
+```
 
 ### Windows PowerShell
 
-\`\`\`powershell
+```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-\`\`\`
+```
 
 ## Шаг 3. Установите зависимости
 
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 Если requirements.txt отсутствует:
 
-\`\`\`bash
+```bash
 pip install pandas pyarrow fastapi uvicorn pydantic scikit-learn joblib pytest httpx
-\`\`\`
+```
 
 ---
 
@@ -176,23 +176,23 @@ pip install pandas pyarrow fastapi uvicorn pydantic scikit-learn joblib pytest h
 
 Создайте папку raw-data:
 
-\`\`\`bash
+```bash
 mkdir -p data/raw
-\`\`\`
+```
 
 Поместите CSV-файлы:
 
-\`\`\`text
+```text
 data/raw/fundamentals.csv
 data/raw/securities.csv
 data/raw/prices-split-adjusted.csv
-\`\`\`
+```
 
 После этого создайте локальные Parquet-файлы:
 
-\`\`\`bash
+```bash
 python scripts/build_dataset.py
-\`\`\`
+```
 
 ---
 
@@ -200,17 +200,17 @@ python scripts/build_dataset.py
 
 После подготовки Parquet-файлов:
 
-\`\`\`bash
+```bash
 python scripts/train_model.py
-\`\`\`
+```
 
 Будут созданы:
 
-\`\`\`text
+```text
 models/valuation_model.joblib
 models/scaler.joblib
 models/model_metrics.json
-\`\`\`
+```
 
 Модель классифицирует компании как:
 
@@ -222,35 +222,35 @@ models/model_metrics.json
 
 # 8. Запуск backend API
 
-\`\`\`bash
+```bash
 uvicorn backend.app:app --reload
-\`\`\`
+```
 
 Backend запускается по адресу:
 
-\`\`\`text
+```text
 http://127.0.0.1:8000
-\`\`\`
+```
 
 Swagger docs:
 
-\`\`\`text
+```text
 http://127.0.0.1:8000/docs
-\`\`\`
+```
 
 ---
 
 # 9. Запуск frontend
 
-\`\`\`bash
+```bash
 open frontend/index.html
-\`\`\`
+```
 
 Frontend ожидает backend по адресу:
 
-\`\`\`javascript
+```javascript
 const API_BASE = "http://localhost:8000/api";
-\`\`\`
+```
 
 ---
 
@@ -258,78 +258,78 @@ const API_BASE = "http://localhost:8000/api";
 
 ## Health
 
-\`\`\`text
+```text
 GET /api/health
-\`\`\`
+```
 
 ## Autocomplete
 
-\`\`\`text
+```text
 GET /api/autocomplete?q=AAPL
-\`\`\`
+```
 
 ## Company profile
 
-\`\`\`text
+```text
 GET /api/company_profile?ticker=AAPL
-\`\`\`
+```
 
 ## Historical financials
 
-\`\`\`text
+```text
 GET /api/historical_financials?ticker=AAPL&years=5
-\`\`\`
+```
 
 ## Financial ratios
 
-\`\`\`text
+```text
 GET /api/financial_ratios?ticker=AAPL
-\`\`\`
+```
 
 ## Peer comparison
 
-\`\`\`text
+```text
 GET /api/peer_comparison?ticker=AAPL&limit=8
-\`\`\`
+```
 
 ## ML classification
 
-\`\`\`text
+```text
 GET /api/ml_classify?ticker=AAPL
-\`\`\`
+```
 
 ## Backtest
 
-\`\`\`text
+```text
 POST /api/backtest
-\`\`\`
+```
 
 Пример:
 
-\`\`\`json
+```json
 {
   "tickers": ["AAPL", "MSFT", "IBM", "CSCO"],
   "start_date": "2014-01-01",
   "end_date": "2016-12-31",
   "initial_capital": 10000
 }
-\`\`\`
+```
 
 ---
 
 # 11. Запуск тестов
 
-\`\`\`bash
+```bash
 pytest -q
-\`\`\`
+```
 
 Отдельные тесты:
 
-\`\`\`bash
+```bash
 pytest -q tests/test_data_layer.py
 pytest -q tests/test_api.py
 pytest -q tests/test_ml_service.py
-\`\`\`
+```
 
 ---
 
@@ -337,26 +337,26 @@ pytest -q tests/test_ml_service.py
 
 ## Коммитить:
 
-\`\`\`text
+```text
 backend/
 frontend/
 scripts/
 tests/
 requirements.txt
 README.md
-\`\`\`
+```
 
 ## Не коммитить:
 
-\`\`\`text
+```text
 data/raw/
 data/*.parquet
 models/*.joblib
-\`\`\`
+```
 
 Рекомендуемый .gitignore:
 
-\`\`\`gitignore
+```gitignore
 __pycache__/
 *.pyc
 .venv/
@@ -375,20 +375,20 @@ models/model_metrics.json
 .DS_Store
 .vscode/
 .idea/
-\`\`\`
+```
 
 ---
 
 # 13. Git-команды
 
-\`\`\`bash
+```bash
 git init
 git status
 git add backend frontend scripts tests requirements.txt README.md
 git commit -m "Initial InvestIQ project"
 git branch -M main
 git push -u origin main
-\`\`\`
+```
 
 ---
 
@@ -396,26 +396,26 @@ git push -u origin main
 
 ## Dataset not found
 
-\`\`\`bash
+```bash
 python scripts/build_dataset.py
-\`\`\`
+```
 
 ## Ticker not found
 
-\`\`\`bash
+```bash
 python - <<'PY'
 import pandas as pd
 
 df = pd.read_parquet("data/sp500_complete.parquet")
 print(sorted(df["ticker"].dropna().str.upper().unique())[:100])
 PY
-\`\`\`
+```
 
 ## ModuleNotFoundError
 
-\`\`\`bash
+```bash
 touch backend/__init__.py
-\`\`\`
+```
 
 ## Plotly charts do not show
 
