@@ -1,5 +1,445 @@
 # InvestIQ
 
+InvestIQ — это offline-first веб-приложение для учебного фундаментального анализа компаний S&P 500.
+
+Пользователь может ввести тикер компании и получить:
+
+- профиль компании
+- исторические финансовые данные
+- коэффициенты оценки и качества бизнеса
+- сравнение с конкурентами
+- локальную ML-классификацию стоимости компании
+- простой учебный бэктест
+
+Проект использует:
+
+- FastAPI backend
+- HTML/CSS/JavaScript frontend
+- Plotly-графики
+
+InvestIQ НЕ использует Streamlit.
+
+---
+
+# 1. Статус проекта
+
+Текущая структура проекта:
+
+\`\`\`text
+investiq/
+  backend/
+    __init__.py
+    app.py
+    data_layer.py
+    ratio_service.py
+    peer_service.py
+    ml_service.py
+    backtest_service.py
+    schemas.py
+
+  frontend/
+    index.html
+    analysis.html
+    style.css
+    script.js
+
+  scripts/
+    build_dataset.py
+    train_model.py
+
+  data/
+    raw/
+      fundamentals.csv
+      securities.csv
+      prices-split-adjusted.csv
+    sp500_complete.parquet
+    sp500_prices.parquet
+
+  models/
+    valuation_model.joblib
+    scaler.joblib
+    model_metrics.json
+
+  tests/
+    conftest.py
+    test_data_layer.py
+    test_api.py
+    test_ml_service.py
+
+  requirements.txt
+  README.md
+\`\`\`
+
+---
+
+# 2. Важные правила проекта
+
+Приложение разработано для автономной работы после локальной подготовки данных.
+
+Во время работы backend НЕ обращается к:
+
+- yfinance
+- SEC EDGAR
+- Wikipedia
+- Kaggle API
+- live market API
+- любым сетевым источникам
+
+Backend читает только локальные Parquet-файлы:
+
+\`\`\`text
+data/sp500_complete.parquet
+data/sp500_prices.parquet
+\`\`\`
+
+Frontend использует Plotly через CDN в analysis.html.
+
+Это означает, что графики требуют интернет-соединения, если Plotly не сохранён локально.
+
+---
+
+# 3. Требования к датасету
+
+Используется Kaggle-датасет:
+
+dgawlik/nyse
+
+Необходимые файлы:
+
+\`\`\`text
+data/raw/fundamentals.csv
+data/raw/securities.csv
+data/raw/prices-split-adjusted.csv
+\`\`\`
+
+Игнорируемый файл:
+
+\`\`\`text
+data/raw/prices.csv
+\`\`\`
+
+---
+
+# 4. Ограничения данных
+
+Анализировать можно только тикеры, существующие в локально подготовленном датасете.
+
+Некоторые популярные тикеры S&P 500 могут отсутствовать, если исходные CSV-файлы не содержат полных финансовых данных.
+
+Итоговый датасет может содержать меньше 500 компаний. Это нормально, поскольку финальный набор зависит от пересечения:
+
+- financial fundamentals
+- securities metadata
+- historical prices
+
+---
+
+# 5. Установка
+
+## Шаг 1. Перейдите в папку проекта
+
+\`\`\`bash
+cd InvestIQ
+\`\`\`
+
+## Шаг 2. Создайте виртуальное окружение
+
+### Mac/Linux
+
+\`\`\`bash
+python3 -m venv .venv
+source .venv/bin/activate
+\`\`\`
+
+### Windows PowerShell
+
+\`\`\`powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+\`\`\`
+
+## Шаг 3. Установите зависимости
+
+\`\`\`bash
+pip install -r requirements.txt
+\`\`\`
+
+Если requirements.txt отсутствует:
+
+\`\`\`bash
+pip install pandas pyarrow fastapi uvicorn pydantic scikit-learn joblib pytest httpx
+\`\`\`
+
+---
+
+# 6. Подготовка данных
+
+Создайте папку raw-data:
+
+\`\`\`bash
+mkdir -p data/raw
+\`\`\`
+
+Поместите CSV-файлы:
+
+\`\`\`text
+data/raw/fundamentals.csv
+data/raw/securities.csv
+data/raw/prices-split-adjusted.csv
+\`\`\`
+
+После этого создайте локальные Parquet-файлы:
+
+\`\`\`bash
+python scripts/build_dataset.py
+\`\`\`
+
+---
+
+# 7. Обучение ML-модели
+
+После подготовки Parquet-файлов:
+
+\`\`\`bash
+python scripts/train_model.py
+\`\`\`
+
+Будут созданы:
+
+\`\`\`text
+models/valuation_model.joblib
+models/scaler.joblib
+models/model_metrics.json
+\`\`\`
+
+Модель классифицирует компании как:
+
+- UNDERVALUED
+- FAIRLY_VALUED
+- OVERVALUED
+
+---
+
+# 8. Запуск backend API
+
+\`\`\`bash
+uvicorn backend.app:app --reload
+\`\`\`
+
+Backend запускается по адресу:
+
+\`\`\`text
+http://127.0.0.1:8000
+\`\`\`
+
+Swagger docs:
+
+\`\`\`text
+http://127.0.0.1:8000/docs
+\`\`\`
+
+---
+
+# 9. Запуск frontend
+
+\`\`\`bash
+open frontend/index.html
+\`\`\`
+
+Frontend ожидает backend по адресу:
+
+\`\`\`javascript
+const API_BASE = "http://localhost:8000/api";
+\`\`\`
+
+---
+
+# 10. API endpoints
+
+## Health
+
+\`\`\`text
+GET /api/health
+\`\`\`
+
+## Autocomplete
+
+\`\`\`text
+GET /api/autocomplete?q=AAPL
+\`\`\`
+
+## Company profile
+
+\`\`\`text
+GET /api/company_profile?ticker=AAPL
+\`\`\`
+
+## Historical financials
+
+\`\`\`text
+GET /api/historical_financials?ticker=AAPL&years=5
+\`\`\`
+
+## Financial ratios
+
+\`\`\`text
+GET /api/financial_ratios?ticker=AAPL
+\`\`\`
+
+## Peer comparison
+
+\`\`\`text
+GET /api/peer_comparison?ticker=AAPL&limit=8
+\`\`\`
+
+## ML classification
+
+\`\`\`text
+GET /api/ml_classify?ticker=AAPL
+\`\`\`
+
+## Backtest
+
+\`\`\`text
+POST /api/backtest
+\`\`\`
+
+Пример:
+
+\`\`\`json
+{
+  "tickers": ["AAPL", "MSFT", "IBM", "CSCO"],
+  "start_date": "2014-01-01",
+  "end_date": "2016-12-31",
+  "initial_capital": 10000
+}
+\`\`\`
+
+---
+
+# 11. Запуск тестов
+
+\`\`\`bash
+pytest -q
+\`\`\`
+
+Отдельные тесты:
+
+\`\`\`bash
+pytest -q tests/test_data_layer.py
+pytest -q tests/test_api.py
+pytest -q tests/test_ml_service.py
+\`\`\`
+
+---
+
+# 12. GitHub setup
+
+## Коммитить:
+
+\`\`\`text
+backend/
+frontend/
+scripts/
+tests/
+requirements.txt
+README.md
+\`\`\`
+
+## Не коммитить:
+
+\`\`\`text
+data/raw/
+data/*.parquet
+models/*.joblib
+\`\`\`
+
+Рекомендуемый .gitignore:
+
+\`\`\`gitignore
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+data/raw/
+data/*.parquet
+
+models/*.joblib
+models/model_metrics.json
+
+.pytest_cache/
+.coverage
+
+.DS_Store
+.vscode/
+.idea/
+\`\`\`
+
+---
+
+# 13. Git-команды
+
+\`\`\`bash
+git init
+git status
+git add backend frontend scripts tests requirements.txt README.md
+git commit -m "Initial InvestIQ project"
+git branch -M main
+git push -u origin main
+\`\`\`
+
+---
+
+# 14. Troubleshooting
+
+## Dataset not found
+
+\`\`\`bash
+python scripts/build_dataset.py
+\`\`\`
+
+## Ticker not found
+
+\`\`\`bash
+python - <<'PY'
+import pandas as pd
+
+df = pd.read_parquet("data/sp500_complete.parquet")
+print(sorted(df["ticker"].dropna().str.upper().unique())[:100])
+PY
+\`\`\`
+
+## ModuleNotFoundError
+
+\`\`\`bash
+touch backend/__init__.py
+\`\`\`
+
+## Plotly charts do not show
+
+Для полной offline-работы скачайте Plotly локально.
+
+## Pydantic field_validator error
+
+\`\`\`bash
+pip install --upgrade fastapi pydantic
+\`\`\`
+
+---
+
+# 15. Educational disclaimer
+
+InvestIQ является учебным проектом.
+
+Это НЕ инвестиционный совет.
+
+ML-модель обучается на локальных данных и упрощённых правилах.
+
+Бэктест является исключительно демонстрационным.
+# InvestIQ
+
 InvestIQ is an offline-first web application for educational fundamental analysis of S&P 500 companies.
 
 It lets a user enter a ticker and review:
